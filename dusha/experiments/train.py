@@ -6,6 +6,7 @@ import click
 import lazycon
 import numpy as np
 import torch
+import json
 
 from core.learner import Learner
 
@@ -48,7 +49,14 @@ def train_model(config_path, exp_path):
 
     # load pretrained model
     if cfg.pt_model_path is not None:
-        model.load_state_dict(torch.load(cfg.pt_model_path, map_location="cuda:0"))
+        # state_dict_data = {}
+        # with open(cfg.pt_model_path, 'r')as file:
+        #     for line in file:
+        #         item = json.loads(line)
+        #         state_dict_data.update(item)
+        #
+        # model.load_state_dict(state_dict_data)
+        model.load_state_dict(torch.load(cfg.pt_model_path))
         shutil.copy(cfg.pt_model_path, exp_path / "pt_model")
 
     # init learner
@@ -81,10 +89,10 @@ def train_model(config_path, exp_path):
 
 if __name__ == "__main__":
     # fix seeds for reproducibility
-    torch.manual_seed(0)
-    random.seed(0)
-    np.random.seed(0)
-    torch.backends.cudnn.benchmark = False
-    torch.use_deterministic_algorithms(True)
+    # torch.manual_seed(0)
+    # random.seed(0)
+    # np.random.seed(0)
+    # torch.backends.cudnn.benchmark = False
+    # torch.use_deterministic_algorithms(True)
 
     train_model()

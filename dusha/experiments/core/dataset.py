@@ -1,3 +1,4 @@
+from functools import partial
 from pathlib import Path
 
 import numpy as np
@@ -44,6 +45,16 @@ def adaptive_padding_collate_fn(batch):
     return torch.stack(data), torch.tensor(target)
 
 
+def crop_f(tens, crop_augm_max_cut_size):
+    """
+    Applies a random crop to the tensor with a randomly sampled crop size.
+    """
+    crop_delta = np.random.randint(crop_augm_max_cut_size)
+    random_crop = transforms.RandomCrop(
+        np.array(tens.shape)[1:] - np.array([0, crop_delta])
+    )
+    return random_crop(tens)
+
 def get_augm_func(time_mask_param=80, freq_mask_param=16, crop_augm_max_cut_size=0):
     """
     Returns function for augmentation in MelEmotionsDataset (augm_transform)
@@ -54,26 +65,48 @@ def get_augm_func(time_mask_param=80, freq_mask_param=16, crop_augm_max_cut_size
     :param crop_augm_max_cut_size: if 0 - random crops are not used
     :return:
     """
-
     t_masking = T.TimeMasking(time_mask_param=time_mask_param)
     f_masking = T.FrequencyMasking(freq_mask_param=freq_mask_param)
 
     if crop_augm_max_cut_size != 0:
-        # we want random crop with random size,
-        # so we should sample crop size for each augm_transform call
-        def crop_f(tens):
-            crop_delta = np.random.randint(crop_augm_max_cut_size)
-            random_crop = transforms.RandomCrop(
-                np.array(tens.shape)[1:] - np.array([0, crop_delta])
-            )
-
-            return random_crop(tens)
-
-        augm_transform = transforms.Compose([f_masking, t_masking, crop_f])
+        # Use functools.partial to create a partially applied function
+        crop_function = partial(crop_f, crop_augm_max_cut_size=crop_augm_max_cut_size)
+        augm_transform = transforms.Compose([f_masking, t_masking, crop_function])
     else:
         augm_transform = transforms.Compose([f_masking, t_masking])
 
     return augm_transform
+
+# def get_augm_func(time_mask_param=80, freq_mask_param=16, crop_augm_max_cut_size=0):
+#     """
+#     Returns function for augmentation in MelEmotionsDataset (augm_transform)
+#     Returned function's input should have [bs, 1, T] shape
+#
+#     :param time_mask_param:
+#     :param freq_mask_param:
+#     :param crop_augm_max_cut_size: if 0 - random crops are not used
+#     :return:
+#     """
+#
+#     t_masking = T.TimeMasking(time_mask_param=time_mask_param)
+#     f_masking = T.FrequencyMasking(freq_mask_param=freq_mask_param)
+#
+#     if crop_augm_max_cut_size != 0:
+#         # we want random crop with random size,
+#         # so we should sample crop size for each augm_transform call
+#         def crop_f(tens):
+#             crop_delta = np.random.randint(crop_augm_max_cut_size)
+#             random_crop = transforms.RandomCrop(
+#                 np.array(tens.shape)[1:] - np.array([0, crop_delta])
+#             )
+#
+#             return random_crop(tens)
+#
+#         augm_transform = transforms.Compose([f_masking, t_masking, crop_f])
+#     else:
+#         augm_transform = transforms.Compose([f_masking, t_masking])
+#
+#     return augm_transform
 
 
 class MelEmotionsDataset(Dataset):

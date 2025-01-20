@@ -39,7 +39,7 @@ def read_data_markup(dataset_path: Path, use_tsv: bool) -> List[MarkupDataclass]
     markup_data = []
     if use_tsv:
         with open(
-            dataset_path.parent / (dataset_path.stem + ".tsv"), "r", encoding="utf-8"
+            dataset_path.parent / (dataset_path.stem + ".tsv"), "r", encoding="utf-8", errors='ignore'
         ) as file:
             headers = file.readline().rstrip("\r\n").split("\t")
             for line in file:
@@ -49,7 +49,7 @@ def read_data_markup(dataset_path: Path, use_tsv: bool) -> List[MarkupDataclass]
                 markup_data.append(row)
     else:
         with open(
-            dataset_path.parent / (dataset_path.stem + ".jsonl"), "r", encoding="utf-8"
+            dataset_path.parent / (dataset_path.stem + ".jsonl"), "r", encoding="utf-8", errors='ignore'
         ) as file:
             for line in file:
                 row = MarkupDataclass(**json.loads(line))
@@ -62,14 +62,14 @@ def agg_data_to_file(
 ) -> None:
     if use_tsv:
         with open(
-            file_path.parent / (file_path.stem + ".tsv"), "w", encoding="utf-8"
+            file_path.parent / (file_path.stem + ".tsv"), "w", encoding="utf-8", errors='ignore'
         ) as file:
             print(HEADER, file=file, end=os.linesep)
             for row in agg_data:
                 print("\t".join(row.__dict__.values()), file=file, end=os.linesep)
     else:
         with open(
-            file_path.parent / (file_path.stem + ".jsonl"), "w", encoding="utf-8"
+            file_path.parent / (file_path.stem + ".jsonl"), "w", encoding="utf-8", errors='ignore'
         ) as file:
             for row in agg_data:
                 line = json.dumps(row.__dict__, ensure_ascii=False)
@@ -81,7 +81,7 @@ def exp_data_to_file(
 ) -> None:
     if use_tsv:
         with open(
-            file_path.parent / (file_path.stem + ".tsv"), "w", encoding="utf-8"
+            file_path.parent / (file_path.stem + ".tsv"), "w", encoding="utf-8", errors='ignore'
         ) as file:
             print(HEADER_EXP, file=file, end=os.linesep)
             for row in exp_data:
@@ -89,7 +89,7 @@ def exp_data_to_file(
                 print(line, file=file, end=os.linesep)
     else:
         with open(
-            file_path.parent / (file_path.stem + ".jsonl"), "w", encoding="utf-8"
+            file_path.parent / (file_path.stem + ".jsonl"), "w", encoding="utf-8", errors='ignore'
         ) as file:
             for row in exp_data:
                 line = json.dumps(row.__dict__, ensure_ascii=False)

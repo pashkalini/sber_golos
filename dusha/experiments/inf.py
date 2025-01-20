@@ -12,8 +12,8 @@ from core.metrics import get_metrics_df
 from core.model import AUDIO_COLS, SoftMaxModel
 from core.utils import collect_metrics_to_one, load_jsonl_as_df, raw_parse_dir
 
-DEVICE = "cuda:0"
-
+# DEVICE = "cuda:0"
+DEVICE = "cpu"
 
 def run_single_inf(exp_path, test_manifest, with_metrics, recalculate, device):
     # parse exp_path
